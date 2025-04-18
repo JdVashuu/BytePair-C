@@ -13,6 +13,8 @@
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
 
+#include "bpe.h"
+
 #define swap(Type, x, y) \
 do{\
     Type t = (x);\
@@ -20,15 +22,7 @@ do{\
     (y) = t; \
 } while(0); \
 
-typedef struct{
-    uint32_t l, r;
-}Pair;
 
-typedef struct {
-    Pair *items;
-    size_t count;
-    size_t capacity;
-}Pairs;
 
 typedef struct{
     Pair key;
@@ -66,34 +60,16 @@ void render_tokens(Pairs pairs, Tokens tokens){
     printf("\n");
 }
 
-void generate_dots(Pairs pairs){
-    //this is an unnecessary function for generating graphs using graphwiz, no actual involvemnet in code
-    printf("digraph Pair{\n");
-    for(uint32_t token = 0; token < pairs.count; ++token){
-        if(token != pairs.items[token].l){
-            printf(" %u -> %u\n", token, pairs.items[token].l);
-            printf(" %u -> %u\n", token, pairs.items[token].r);
-        }
-    }
-    printf("}\n");
-}
-
-
 bool dump_pairs(const char *file_path, Pairs pairs){
     return nob_write_entire_file(file_path, pairs.items, pairs.count*sizeof(*pairs.items));
-}
-
-bool load_pairs(const char *file_path, Pairs pairs, String_Builder *sb){
-    if(!read_entire_file(file_path, sb))    return false;
-    if(sb->count%sizeof(*pairs.items) != 0){
-       fprintf(stderr, "ERROR: size of ")
-    }
 }
 
 
 int main(){
 
-    const char* text = "The original BPE algorithm operates by iteratively replacing the most common contiguous sequences of characters in a target text with unused 'placeholder' bytes. The iteration ends when no sequences can be found, leaving the target text effectively compressed. Decompression can be performed by reversing this process, querying known placeholder terms against their corresponding denoted sequence, using a lookup table. In the original paper, this lookup table is encoded and stored alongside the compressed text.";
+    // const char* text = "The original BPE algorithm operates by iteratively replacing the most common contiguous sequences of characters in a target text with unused 'placeholder' bytes. The iteration ends when no sequences can be found, leaving the target text effectively compressed. Decompression can be performed by reversing this process, querying known placeholder terms against their corresponding denoted sequence, using a lookup table. In the original paper, this lookup table is encoded and stored alongside the compressed text.";
+
+    const char *text = "the quick brown fox jumps over the lazy fox";
     int text_size = strlen(text);
 
     Freq *freq = NULL;
@@ -155,7 +131,6 @@ int main(){
         swap(Tokens, tokens_in, tokens_out);
     }
 
-    generate_dots(pairs);
     if(!dump_pairs("pairs.bin", pairs)) return 1;
 
 
